@@ -1,6 +1,9 @@
 # MagneticSphere AI
+🧲 MagneticSphere AI
 
-Multi-agent opportunity prediction platform for hackathon demos.
+AI-powered autonomous opportunity intelligence platform
+
+Multi-agent opportunity prediction platform for.
 
 MagneticSphere AI turns market signals into explainable opportunity scores, recommended actions, and generated outreach. The repository is structured as a production-shaped monorepo while keeping the default experience runnable with deterministic demo data.
 
