@@ -1,9 +1,13 @@
 # MagneticSphere AI
-🧲 MagneticSphere AI
+# 🧲 MagneticSphere AI
 
-AI-powered autonomous opportunity intelligence platform
+> Predict opportunities before competitors see them.
 
-Multi-agent opportunity prediction platform for.
+AI-powered multi-agent opportunity intelligence platform that continuously captures business signals, reasons over them using GraphRAG and LLMs, and autonomously triggers actions.
+
+Detect. Reason. Predict. Act.
+
+Multi-agent opportunity prediction platform .
 
 MagneticSphere AI turns market signals into explainable opportunity scores, recommended actions, and generated outreach. The repository is structured as a production-shaped monorepo while keeping the default experience runnable with deterministic demo data.
 
@@ -82,6 +86,26 @@ Run continuously every 30 minutes:
 ```bash
 python -m app.tasks.run_agents --interval 1800
 ```
+┌──────────────┐
+│ News Sources │
+└──────┬───────┘
+       ↓
+┌────────────────┐
+│ Signal Agents  │
+└────────────────┘
+       ↓
+┌────────────────┐
+│ LangGraph Flow │
+└────────────────┘
+       ↓
+┌────────────────┐
+│ Opportunity AI │
+└────────────────┘
+       ↓
+┌──────────────┬───────────────┐
+│ Slack Alerts │ HubSpot CRM   │
+└──────────────┴───────────────┘
+
 
 ### Required Credentials
 
