@@ -155,6 +155,34 @@ class CompanyReportRepository:
     def _get_latest_postgres(self, key: str) -> dict[str, Any] | None:
         if not self.settings.database_url.startswith("postgres"):
             return None
+        try:
+            import psycopg
+            from psycopg.rows import dict_row
+        except ImportError:
+            return None
+
+        try:
+            with psycopg.connect(self._psycopg_url(), row_factory=dict_row) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT generated_at, payload::text AS payload
+                        FROM company_reports
+                        WHERE company_key = %s OR lower(domain) = lower(%s)
+                        ORDER BY generated_at DESC
+                        LIMIT 1
+                        """,
+                        (key, key),
+                    )
+                    row = cur.fetchone()
+                    if not row:
+                        return None
+                    return {
+                        "generated_at": row["generated_at"].isoformat(),
+                        "payload": row["payload"],
+                    }
+        except Exception:
+            return None
 
     def _previous_report_postgres(self, key: str, before_report_id: str | None) -> dict[str, Any] | None:
         if not self.settings.database_url.startswith("postgres"):
@@ -214,39 +242,10 @@ class CompanyReportRepository:
                             LIMIT %s
                             """,
                             (limit,),
-                        )
+                    )
                     return [dict(row) for row in cur.fetchall()]
         except Exception:
             return []
-
-        try:
-            import psycopg
-            from psycopg.rows import dict_row
-        except ImportError:
-            return None
-
-        try:
-            with psycopg.connect(self._psycopg_url(), row_factory=dict_row) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        """
-                        SELECT generated_at, payload::text AS payload
-                        FROM company_reports
-                        WHERE company_key = %s OR lower(domain) = lower(%s)
-                        ORDER BY generated_at DESC
-                        LIMIT 1
-                        """,
-                        (key, key),
-                    )
-                    row = cur.fetchone()
-                    if not row:
-                        return None
-                    return {
-                        "generated_at": row["generated_at"].isoformat(),
-                        "payload": row["payload"],
-                    }
-        except Exception:
-            return None
 
     def _save_sqlite(self, key: str, report: CompanyReport, payload: str) -> None:
         with sqlite3.connect(self.sqlite_path) as conn:

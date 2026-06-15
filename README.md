@@ -34,29 +34,92 @@ Full product and system documentation is available in `docs/PROJECT_DOCUMENTATIO
 
 ## Quick Start
 
-### Frontend
+### 1. Install Dependencies
 
-```bash
-cd apps/web
-npm install
-npm run dev
-```
-
-Open `http://localhost:3000`.
-
-### Backend
+Backend:
 
 ```bash
 cd apps/api
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+Frontend:
+
+```bash
+cd apps/web
+npm install
+```
+
+### 2. Configure Local Environment
+
+Copy the example file and keep real credentials local:
+
+```bash
+copy .env.example .env
+```
+
+The checked-in `.env.example` contains only blanks/placeholders. Do not commit `.env`.
+
+For the full dashboard to call the API, keep:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### 3. Run The App
+
+Backend:
+
+```bash
+cd apps/api
+.venv\Scripts\activate
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open `http://localhost:8000/docs`.
+Frontend:
 
-The frontend uses demo data by default and can call the backend when `NEXT_PUBLIC_API_URL=http://localhost:8000` is set.
+```bash
+cd apps/web
+npm run dev
+```
+
+Open:
+
+- `http://localhost:3000` for the dashboard.
+- `http://localhost:3000/agents` for the LangGraph agent view.
+- `http://localhost:3000/integrations` for integration health.
+- `http://localhost:8000/docs` for the API docs.
+
+The frontend can render fallback demo UI without the API, but the searchable company reports, history, raw evidence, actions, and integration status need the backend running.
+
+Windows note: if Next.js fails because `NODE_OPTIONS` contains a VS Code debugger hook, run the frontend with:
+
+```powershell
+$env:NODE_OPTIONS = ""
+npm.cmd run dev
+```
+
+## Verification
+
+Useful checks before a demo or deployment:
+
+```bash
+cd apps/api
+python -m compileall app
+```
+
+```powershell
+cd apps/web
+$env:NODE_OPTIONS = ""
+$env:NODE_ENV = "production"
+npm.cmd run build
+```
+
+```bash
+curl http://localhost:8000/api/health
+```
 
 ## Turning On Real Integrations
 
@@ -74,6 +137,13 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 Open `http://localhost:8000/api/integrations/status` to see which providers are active.
+
+Optional local services are defined in `infra/docker-compose.yml`. Set `POSTGRES_PASSWORD` and `NEO4J_PASSWORD` in your local `.env` before running Docker Compose:
+
+```bash
+cd infra
+docker compose up -d
+```
 
 Run the agent pipeline once:
 
@@ -115,6 +185,13 @@ python -m app.tasks.run_agents --interval 1800
 - `QDRANT_URL` and optional `QDRANT_API_KEY`: semantic opportunity memory.
 - `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`: knowledge graph storage.
 - `NEWS_RSS_FEEDS`: comma-separated RSS feeds for live news signals.
+
+## Current Limitations
+
+- Funding, hiring, social sentiment, and private tech-stack data are partly inferred from news/GitHub unless paid/vendor APIs are added.
+- Qdrant, Neo4j, PostgreSQL, Slack, HubSpot, NewsAPI, GitHub, and Gemini are optional and only used when configured.
+- Report generation is synchronous today; a production deployment should add a background queue for long-running provider calls.
+- There is not yet a formal automated test suite.
 
 ## Demo Flow
 
